@@ -25,23 +25,25 @@ after_space
 bubble_sort
     sub     r1, r1, #(20)
     stmfd   sp!,{r4-r7, lr}    ; Register preservation
-    SUB     r2, r2, #1      ; Decrease array length by 1
-    mov     r10, #(0)       # j=0
+    mov     r10, #(0)       ; j=0
+    sub 	r2, r2, #1
+    MOV     r5, r2          ; Loop counter for inner loop initial
 outer_loop
     MOV     r4, #0          ; Flag indicating if any swaps occurred
-    MOV     r5, r2          ; Loop counter for inner loop initial i=5-1
-    cmp     r5, 0
+    cmp     r5, #0
     beq     finish
 inner_loop
-    cmp     r10, r5 ; if(j<i)
-    movgt   r10, #0
-    subgt   r5, r2, #(-1)
-    bgt     outer_loop     
+	mov		r8, r10, lsr #2 
+    cmp     r8, r5 ; if(j>i)
+    moveq   r10, #0
+    subeq   r5, r5, #1
+    beq     outer_loop     
     LDR     r6, [r1, r10]        ; Load current element
-    LDR     r7, [r1, #4]    ; Load next element
+    add 	r11, r10, #4
+    LDR     r7, [r1, r11]    ; Load next element
     cmp     r6, r7
     blt     swap
-    add     r10, #(4)
+    add     r10, r10,#(4)
     b       inner_loop
 
 end_sort
@@ -59,5 +61,8 @@ scan
 	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
 swap
     str     r7, [r1, r10]
-    str     r6, [r1, r10, #4]
+    add 	r11, r10, #4
+    str     r6, [r1, r11]
+    add r10, r10, #4
+    b inner_loop
     END
