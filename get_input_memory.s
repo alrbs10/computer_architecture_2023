@@ -36,5 +36,10 @@ finish
     mov       r1, #0x20000        
     add       r1, r1, #0x26       
     SWI       0x123456           
+scan   
+    stmfd	sp!, {lr} ; Push onto a Full Descending Stack
+	mov		r0, #7 ; r0 = 7
+	swi		0x123456
+	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
 
     END
