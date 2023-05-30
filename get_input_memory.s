@@ -26,6 +26,7 @@ after_space
     bl      scan_num
 
 load_num
+    sub     r1, #(-4)
     ldr     r5, [r1], #(-4)
     ldr     r5, [r1], #(-4)
     ldr     r5, [r1], #(-4)
