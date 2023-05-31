@@ -23,6 +23,7 @@ scan_num
 after_space
     cmp     r7, #1          ; if minus was detected
     subeq   r3, r7, r3      ; r3 = -r3
+    subeq   r3, r3, #1
     moveq   r7, #0          ; initial flag for minus
     add     r2, r2, #1      ; counter +1 for 5 num inputs
     str     r3, [r1], #4    ; store
@@ -59,7 +60,7 @@ print_sorted_num
     mov     r2, #0          ; for quotient
     mov     r7, #0          ; record digit(for space & check printing number finish, =r7)
 	mov		r8, #0          ; counter for how many number printed(max 5, =r8)
-    mov     r9, #45         ; save '-' for minus inputs
+    mov     r9, #(-3)         ; save '-' for minus inputs
     mov     r10, #0         ; flag for minus inputs
 get_sorted_num
     cmp     r8, #5          ; if 5 number printed, finish whole function
@@ -67,8 +68,9 @@ get_sorted_num
 	mov	    r1, #0x80000000 ; after printing char, need r1 refresh
     ldr     r0, [r1, r8, lsl #2] ; load r0 which need to be printed, start by r1, r8(counter)*4
 	add		r8, r8, #1      ; counter ++ after loading number
-    cmp     r8, r2          ; check if number is minus(since r2=0 at loading number part)
+    cmp     r0, r2          ; check if number is minus(since r2=0 at loading number part)
     sublt   r0, r2, r0      ; r0 = -r0
+    ;sublt   r0, r0, #1
     movlt   r10, #1         ; flag = 1
 divide_for_decimal
  	cmp     r0, r12         ; if r0<10, r0 now be remainder
@@ -87,6 +89,7 @@ end_divide
 
 check_before_print
     cmp     r10, #1         ; check if number was minus
+    moveq   r10, #0         ; refresh flag
     bleq    add_dash_for_minus
     beq     print_num
 add_dash_for_minus
