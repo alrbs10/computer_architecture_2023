@@ -2,22 +2,29 @@
     ENTRY
 main
 init    
-    mov     r12, #10 ; r12 = 10
-    mov     r0, #0
-    mov     r1, #0x80000000 ;address for 5 number inputs
-    mov     r2, #0 ;counter for 5 number inputs
-    mov     r3, #0 ;init for initial input
+    mov     r0, #0          ; register for getting input from scan
+    mov     r1, #0x80000000 ; address for 5 number inputs(=r0)
+    mov     r2, #0          ; counter for 5 number inputs(=r2)
+    mov     r3, #0          ; init for initial input(=r3)
+    mov     r7, #0          ; flag for minus(=r7)
+    mov     r12, #10        ; r12 = 10 for making decimal num(=r12)
 scan_num
-    bl      scan
-    sub     r0, r0, #'0' ; ASCII -> decimal
-    cmp     r0, #(-16) ; if space is detected, go to next input
-    beq     after_space
-    mul     r3, r12, r3 ; multiply 10 for before num
-    add     r3, r0, r3 ; add recently scanned number
-    b      scan_num 
+    bl      scan            ; get keyboard input
+    sub     r0, r0, #'0'    ; ASCII -> decimal
+    cmp     r0, #(-16)      ; if space is detected, go to next input
+    beq     after_space     
+    cmp     r0, #(-3)       ; if '-' is detected, make flag
+    moveq   r7, #1          
+    b       scan_num
+    mul     r3, r12, r3     ; multiply 10 for before num
+    add     r3, r0, r3      ; add recently scanned number
+    b       scan_num        ; loop
 after_space
-    add     r2, r2, #1
-    str     r3, [r1], #4
+    cmp     r7, #1          ; if minus was detected
+    subeq   r3, r7, r3      ; r3 = -r3
+    moveq   r7, #0          ; initial flag for minus
+    add     r2, r2, #1      ; counter +1 for 5 num inputs
+    str     r3, [r1], #4    ; store
     mov     r3, #0
     cmp     r2, #5
     beq     bubble_sort
@@ -41,7 +48,7 @@ inner_loop
     LDR     r6, [r1, r10]        ; Load current element
     add 	r11, r10, #4
     LDR     r7, [r1, r11]    ; Load next element
-    cmp     r7, r6 ;cmp r6, r7 : ascending(123), r7, r6: descending(321)
+    cmp     r6, r7 ;cmp r6, r7 : ascending(123), r7, r6: descending(321)
     bgt     swap 
     add     r10, r10,#4
     b       inner_loop
@@ -92,8 +99,8 @@ PRINT_NUM
     bl      print_char
     sub     r7, r7, #1
     CMP     r7, #0
-   	;moveq	r0, #(14)
-    ;bleq	print_char
+   	moveq	r0, #(32)
+    bleq	print_char
     beq     get_sorted_num
     bne     PRINT_NUM
 
