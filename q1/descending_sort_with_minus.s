@@ -51,10 +51,6 @@ inner_loop
     blt     swap
     add     r10, r10,#(4)
     b       inner_loop
-
-end_sort
-    ldmfd   sp!,{r4-r7, pc}    ; Register restoration and return
-
 finish  
     mov       r0, #0x18
     mov       r1, #0x20000        
