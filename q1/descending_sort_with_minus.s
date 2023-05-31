@@ -7,15 +7,21 @@ init
     mov     r1, #0x80000000 ;address for 5 number inputs
     mov     r2, #0 ;counter for 5 number inputs
     mov     r3, #0 ;init for initial input
+    mov     r7, #0
 scan_num
     bl      scan
     sub     r0, r0, #'0' ; ASCII -> decimal
     cmp     r0, #(-16) ; if space is detected, go to next input
     beq     after_space
+    cmp     r0, #(-3) ; if - is detected, make flag
+    moveq   r7, #1
     mul     r3, r12, r3 ; multiply 10 for before num
     add     r3, r0, r3 ; add recently scanned number
     b      scan_num 
 after_space
+    cmp     r7, #1 ; if minus was detected
+    moveq   r7, #0 ;
+    subeq   r3, r7, r3 ; r3 = 0 - r3, same with multiplying -1
     add     r2, r2, #1
     str     r3, [r1], #4
     mov     r3, #0
