@@ -63,50 +63,49 @@ print_sorted_num
     mov     r3, #10
     mov     r2, #0
     mov     r7, #0 ;for num of decimal bits
-		mov			 r8, #0 ;counter for how many number printed
+	mov		r8, #0 ;counter for how many number printed
 get_sorted_num
     cmp     r8, #5
     beq     finish
-		mov			r1, #0x80000000
+	mov	    r1, #0x80000000
     ldr     r0, [r1, r8, lsl #2]
-		add			r8, r8, #1
+	add		r8, r8, #1
 divide_for_decimal
- 	cmp r0, r3  ; if i-10<10
- 	blt end_divide
- 	sub r0, r0, r3  ; r0 = i-10
- 	add r2, r2, #1  ;  share++
- 	bl divide_for_decimal
+ 	cmp     r0, r3  ; if i-10<10
+ 	blt     end_divide
+ 	sub     r0, r0, r3  ; r0 = i-10
+ 	add     r2, r2, #1  ;  share++
+ 	bl      divide_for_decimal
  	
 end_divide
-	stmfd sp!,{r0}
-	add r7, r7, #1
-	cmp r2, #0 ;if) share ==0
-	beq PRINT_NUM
-	mov r0, r2 ;r2 -> r0 (r0 = share)
-	mov r2, #0  ; initialize share
-	bl divide_for_decimal
+	stmfd   sp!,{r0}
+	add     r7, r7, #1
+	cmp     r2, #0 ;if) share ==0
+	beq     PRINT_NUM
+	mov     r0, r2 ;r2 -> r0 (r0 = share)
+	mov     r2, #0  ; initialize share
+	bl      divide_for_decimal
 
 ;DIVIDE_PRINT_END
 
 PRINT_NUM    
-    ldmfd sp!,{r0}
-    add r0, r0, #'0' ;decimal to ascii
-    bl print_char
-    sub r7, r7, #1
-    CMP r7, #0
-    beq get_sorted_num
-    bne PRINT_NUM
+    ldmfd   sp!,{r0}
+    add     r0, r0, #'0' ;decimal to ascii
+    bl      print_char
+    sub     r7, r7, #1
+    CMP     r7, #0
+    beq     get_sorted_num
+    bne     PRINT_NUM
 
 print_char
     stmfd   sp!, {r0, lr}   ; push the registers that
-    
     adr     r1, char
     strb    r0, [r1]
     mov     r0, #3
     swi     0x123456
-    
     ldmfd   sp!, {r0,pc}
-char      DCB      0
+char       
+    DCB      0
 
 swap
     str     r7, [r1, r10]
