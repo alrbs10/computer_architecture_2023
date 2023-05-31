@@ -15,7 +15,7 @@ scan_num
     beq     after_space     
     cmp     r0, #(-3)       ; if '-' is detected, make flag
     moveq   r7, #1          
-    b       scan_num
+    beq     scan_num
     mul     r3, r12, r3     ; multiply 10 for before num
     add     r3, r0, r3      ; add recently scanned number
     b       scan_num        ; loop
