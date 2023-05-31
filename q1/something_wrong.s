@@ -1,13 +1,14 @@
     AREA text, CODE
     ENTRY
 main
-init    
+;initialization part    
     mov     r0, #0          ; register for getting input from scan
     mov     r1, #0x80000000 ; address for 5 number inputs(=r0)
     mov     r2, #0          ; counter for 5 number inputs(=r2)
     mov     r3, #0          ; init for initial input(=r3)
     mov     r7, #0          ; flag for minus(=r7)
     mov     r12, #10        ; r12 = 10 for making decimal num(=r12)
+
 scan_num
     bl      scan            ; get keyboard input
     sub     r0, r0, #'0'    ; ASCII -> decimal
@@ -25,49 +26,37 @@ after_space
     moveq   r7, #0          ; initial flag for minus
     add     r2, r2, #1      ; counter +1 for 5 num inputs
     str     r3, [r1], #4    ; store
-    mov     r3, #0
-    cmp     r2, #5
+    mov     r3, #0          ; return r3=0
+    cmp     r2, #5          ; if we get 5 input, finish function & go to sort
     beq     bubble_sort
     b       scan_num
+
 bubble_sort
-    sub     r1, r1, #(20)
-    stmfd   sp!,{r4-r7, lr}    ; Register preservation
-    mov     r10, #(0)       ; j=0
-    sub 	r2, r2, #1
-    MOV     r5, r2          ; Loop counter for inner loop initial
+    sub     r1, r1, #(20)   ; return r1 to starting point
+    stmfd   sp!,{r4-r7, lr} ; Register preservation
+    sub 	r2, r2, #1      ; initial setting for(i=n-1;i>0;i--)
+    MOV     r5, r2          ; i=n-1 for setting outer loop(=r5)
+    mov     r10, #(0)       ; j=0 setting for inner loop
 outer_loop
-    MOV     r4, #0          ; Flag indicating if any swaps occurred
-    cmp     r5, #0
+    cmp     r5, #0          ; i<=0, stop & go to print part
     beq     print_sorted_num
 inner_loop
-	mov		r8, r10, lsr #2 
-    cmp     r8, r5 ; if(j>i)
-    moveq   r10, #0
-    subeq   r5, r5, #1
-    beq     outer_loop     
-    LDR     r6, [r1, r10]        ; Load current element
-    add 	r11, r10, #4
-    LDR     r7, [r1, r11]    ; Load next element
-    cmp     r6, r7 ;cmp r6, r7 : ascending(123), r7, r6: descending(321)
+	mov		r8, r10, lsr #2 ; r8=r10/4, for checking j<i (since j steps by 4)
+    cmp     r8, r5          ; if j=i finish inner loop
+    moveq   r10, #0         ; refresh j=0
+    subeq   r5, r5, #1      ; as one outer loop finished, i--
+    beq     outer_loop      
+    LDR     r6, [r1, r10]   ; Load current element, A[j]
+    add 	r11, r10, #4    ; for next element
+    LDR     r7, [r1, r11]   ; Load next element, A[j+4]
+    cmp     r6, r7          ; for ascending sort, if current>next, swap occur
     bgt     swap 
-    add     r10, r10,#4
+    add     r10, r10,#4     ; j++ & loop
     b       inner_loop
 
-
-finish  
-    mov     r0, #0x18
-    mov     r1, #0x20000        
-    add     r1, r1, #0x26       
-    SWI     0x123456           
-scan   
-    stmfd	sp!, {lr} ; Push onto a Full Descending Stack
-	mov		r0, #7 ; r0 = 7
-	swi		0x123456
-	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
-
 print_sorted_num
-    mov     r1, #0x80000000
-    mov     r3, #10
+    mov     r1, #0x80000000 ; refresh r1 to original address point
+    ;mov     r12, #10        
     mov     r2, #0
     mov     r7, #0 ;for num of decimal bits
 	mov		r8, #0 ;counter for how many number printed
@@ -78,22 +67,21 @@ get_sorted_num
     ldr     r0, [r1, r8, lsl #2]
 	add		r8, r8, #1
 divide_for_decimal
- 	cmp     r0, r3  ; if i-10<10
+ 	cmp     r0, r12  ; if i-10<10
  	blt     end_divide
- 	sub     r0, r0, r3  ; r0 = i-10
+ 	sub     r0, r0, r12  ; r0 = i-10
  	add     r2, r2, #1  ;  share++
- 	bl      divide_for_decimal
- 	
+ 	bl      divide_for_decimal 	
 end_divide
 	stmfd   sp!,{r0}
 	add     r7, r7, #1
 	cmp     r2, #0 ;if) share ==0
-	beq     PRINT_NUM
+	beq     print_num
 	mov     r0, r2 ;r2 -> r0 (r0 = share)
 	mov     r2, #0  ; initialize share
 	bl      divide_for_decimal
 
-PRINT_NUM    
+print_num    
     ldmfd   sp!,{r0}
     add     r0, r0, #'0' ;decimal to ascii
     bl      print_char
@@ -102,7 +90,7 @@ PRINT_NUM
    	moveq	r0, #(32)
     bleq	print_char
     beq     get_sorted_num
-    bne     PRINT_NUM
+    bne     print_num
 
 print_char
     stmfd   sp!, {r0, lr}   ; push the registers that
@@ -117,6 +105,18 @@ swap
     str     r6, [r1, r11]
     add 	r10, r10, #4
     b 		inner_loop
+
+finish  
+    mov     r0, #0x18
+    mov     r1, #0x20000        
+    add     r1, r1, #0x26       
+    SWI     0x123456           
+scan   
+    stmfd	sp!, {lr} ; Push onto a Full Descending Stack
+	mov		r0, #7 ; r0 = 7
+	swi		0x123456
+	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
+
 char       
     DCB      0
     END
