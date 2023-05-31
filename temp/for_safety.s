@@ -11,9 +11,9 @@ for_loop
 for_non_prime_break
     add     r3, r3, #1  ; i++
     cmp     r3, #5
-    bleq    print_char
-    ble     finish
+    beq     finish
     bne		for_loop	
+    ;bleq    print_char
 scan_num
     stmfd   sp!, {lr}
     mov     r2, #0      ; main check num at all trial, temp
@@ -46,9 +46,9 @@ check_prime
 
     mov     r6, #3          ; divide with r6, starting from 3~r5
 from_3_sqrt
-    cmp     r5, r6
-    addlt   r1, r1, #1
-    blt     return_check
+    cmp     r6, r5
+    addeq   r1, r1, #1
+    beq     return_check
     mov     r7, r2          ; copy original r2 to r7
     bl      divide
     add     r6, r6, #1
@@ -81,21 +81,19 @@ divide_loop
  	b       divide_loop    ; loop
 return_from_divide
     ldmfd   sp!, {pc}
-
-scan   
-    stmfd	sp!, {lr}    ; Push onto a Full Descending Stack
-	mov		r0, #7          ; r0 = 7
-	swi		0x123456
-	ldmfd	sp!, {pc}    ; Pop from a Full Descending 
-    
 print_char
-    stmfd   sp!, {r0, lr}   
-    add     r0, r1, #'0'
+    stmfd   sp!, {r0,r1,lr}   
     adr     r1, char
     strb    r0, [r1]
     mov     r0, #3
     swi     0x123456
-    ldmfd   sp!, {r0,pc}
+    b       finish
+    ldmfd   sp!, {r0,r1,pc}
+scan   
+    stmfd	sp!, {lr}    ; Push onto a Full Descending Stack
+	mov		r0, #7          ; r0 = 7
+	swi		0x123456
+	ldmfd	sp!, {pc}    ; Pop from a Full Descending Stack
 
 finish  
     mov     r0, #0x18
