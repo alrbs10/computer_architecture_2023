@@ -31,7 +31,7 @@ bubble_sort
 outer_loop
     MOV     r4, #0          ; Flag indicating if any swaps occurred
     cmp     r5, #0
-    beq     make_decimal
+    beq     print_sorted_num
 inner_loop
 	mov		r8, r10, lsr #2 
     cmp     r8, r5 ; if(j>i)
@@ -41,7 +41,7 @@ inner_loop
     LDR     r6, [r1, r10]        ; Load current element
     add 	r11, r10, #4
     LDR     r7, [r1, r11]    ; Load next element
-    cmp     r7, r6 ;cmp r6, r7 : ascending(123), r7, r6: descending(321)
+    cmp     r6, r7 ;cmp r6, r7 : ascending(123), r7, r6: descending(321)
     bgt     swap 
     add     r10, r10,#4
     b       inner_loop
@@ -57,56 +57,56 @@ scan
 	mov		r0, #7 ; r0 = 7
 	swi		0x123456
 	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
-	;ENTRY
-print_start
-	mov		r1, r0
-	mov 	r0, #3
-print_num
-	ldrb	r2, [r1]
-	cmp 	r2, #0
-	beq 	finish
-	add		r2, r2, #'0'
-	strb	r2, [r1]
-	sub		r1, r1, #1
-	swi 	0x123456
-	b		print_num
+print_sorted_num
+    mov     r1, #0x80000000
+    mov     r3, #10
+    mov     r2, #0
+    mov     r7, #0 ;for num of decimal bits
+get_sorted_num
+    ldr     r0, [r1], #4
+    cmp     r1, #0x80000014
+    beq     finish
+divide_for_decimal
+ 	cmp r0, r3  ; if i-10<10
+ 	blt end_divide
+ 	sub r0, r0, r3  ; r0 = i-10
+ 	add r2, r2, #1  ;  share++
+ 	bl divide_for_decimal
+ 	
+end_divide
+	stmfd sp!,{r0}
+	add r7, r7, #1
+	cmp r2, #0 ;if) share ==0
+	beq PRINT_NUM
+	mov r0, r2 ;r2 -> r0 (r0 = share)
+	mov r2, #0  ; initialize share
+	bl divide_for_decimal
+
+
+PRINT_NUM    
+    ldmfd sp!,{r0}
+    add r0, r0, #'0' ;decimal to ascii
+    bl print_char
+    sub r7, r7, #1
+    CMP r7, #0
+    beq get_sorted_num
+    bne PRINT_NUM
+
 swap
     str     r7, [r1, r10]
     add 	r11, r10, #4
     str     r6, [r1, r11]
     add 	r10, r10, #4
     b 		inner_loop
-make_decimal
-	mov		r0, #0x80000030
-	mov		r3, #0
-	mov		r9, #(-16)
-	sub		r0, r0, #1
-get_number
-	cmp 	r3, #5
-	add		r0, r0, #1
-	beq		print_start
-	ldr 	r2, [r1], #4
-	mov		r12, #10
-	strb	r9, [r0], #1
-division_init
-	mov		r4, #0
-	mov		r5, r2
-division_loop
-	cmp 	r5, r12
-	blt 	division_done
-	sub 	r5, r5, r12
-	add 	r4, r4, #1
-	b 		division_loop
-division_done
-	strb 	r5, [r0], #1
-	cmp 	r4, r10
-	movgt 	r2, r4
-	addgt	r10, r10, #2
-	bgt 	division_init
-	cmp		r4, #0
-	addeq	r3, r3, #1
-	beq		get_number
-	strb	r4, [r0], #1
-	add		r3, r3, #1
-	b		get_number
+print_char
+    stmfd   sp!, {r0, lr}   ; push the registers that
+    
+    adr     r1, char
+    strb    r0, [r1]
+    mov     r0, #3
+    swi     0x123456
+    
+    ldmfd   sp!, {r0,pc}
+char      DCB      0
+
     END
