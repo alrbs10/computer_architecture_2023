@@ -59,14 +59,17 @@ scan
 	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
 	ENTRY
 print_sorted_num
-    mov     r1, 0x80000000
+    mov     r1, #0x80000000
     mov     r3, #10
     mov     r2, #0
     mov     r7, #0 ;for num of decimal bits
+		mov			 r8, #0 ;counter for how many number printed
 get_sorted_num
-    ldr     r0, [r1], #4
-    cmp     r1, #0x80000014
+    cmp     r8, #5
     beq     finish
+		mov			r1, #0x80000000
+    ldr     r0, [r1, r8, lsl #2]
+		add			r8, r8, #1
 divide_for_decimal
  	cmp r0, r3  ; if i-10<10
  	blt end_divide
