@@ -91,7 +91,8 @@ check_before_print
     cmp     r10, #1         ; check if number was minus
     moveq   r10, #0         ; refresh flag
     bleq    add_dash_for_minus
-    beq     print_num
+    b     print_num
+
 add_dash_for_minus
     stmfd   sp!, {r9}       ; push - for minus indication
 	add     r7, r7, #1      ; digit to pop ++
