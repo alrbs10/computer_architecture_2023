@@ -55,50 +55,62 @@ inner_loop
     b       inner_loop
 
 print_sorted_num
-    mov     r1, #0x80000000 ; refresh r1 to original address point
-    ;mov     r12, #10        
-    mov     r2, #0
-    mov     r7, #0 ;for num of decimal bits
-	mov		r8, #0 ;counter for how many number printed
+    mov     r1, #0x80000000 ; refresh r1 to original address point     
+    mov     r2, #0          ; for quotient
+    mov     r7, #0          ; record digit(for space & check printing number finish, =r7)
+	mov		r8, #0          ; counter for how many number printed(max 5, =r8)
+    mov     r9, #45         ; save '-' for minus inputs
+    mov     r10, #0         ; flag for minus inputs
 get_sorted_num
-    cmp     r8, #5
-    beq     finish
-	mov	    r1, #0x80000000
-    ldr     r0, [r1, r8, lsl #2]
-	add		r8, r8, #1
+    cmp     r8, #5          ; if 5 number printed, finish whole function
+    beq     finish          
+	mov	    r1, #0x80000000 ; after printing char, need r1 refresh
+    ldr     r0, [r1, r8, lsl #2] ; load r0 which need to be printed, start by r1, r8(counter)*4
+	add		r8, r8, #1      ; counter ++ after loading number
+    cmp     r8, r2          ; check if number is minus(since r2=0 at loading number part)
+    sublt   r0, r2, r0      ; r0 = -r0
+    movlt   r10, #1         ; flag = 1
 divide_for_decimal
- 	cmp     r0, r12  ; if i-10<10
- 	blt     end_divide
- 	sub     r0, r0, r12  ; r0 = i-10
- 	add     r2, r2, #1  ;  share++
+ 	cmp     r0, r12         ; if r0<10, r0 now be remainder
+ 	blt     end_divide      
+ 	sub     r0, r0, r12     ; r0 = r0-10,
+ 	add     r2, r2, #1      ; quotient ++
  	bl      divide_for_decimal 	
 end_divide
-	stmfd   sp!,{r0}
-	add     r7, r7, #1
-	cmp     r2, #0 ;if) share ==0
-	beq     print_num
-	mov     r0, r2 ;r2 -> r0 (r0 = share)
-	mov     r2, #0  ; initialize share
+	stmfd   sp!, {r0}       ; as division makes digit from end, need to put in stack
+	add     r7, r7, #1      ; check for number of digits to pop from stack
+	cmp     r2, #0          ; if quotient become 0, time to print
+	beq     check_before_print
+	mov     r0, r2          ; r2 -> r0 (r0 = quoitent, do for next digit)
+	mov     r2, #0          ; initialize quoitent before re-division
 	bl      divide_for_decimal
+
+check_before_print
+    cmp     r10, #1         ; check if number was minus
+    bleq    add_dash_for_minus
+    beq     print_num
+add_dash_for_minus
+    stmfd   sp!, {r9}       ; push - for minus indication
+	add     r7, r7, #1      ; digit to pop ++
 
 print_num    
     ldmfd   sp!,{r0}
-    add     r0, r0, #'0' ;decimal to ascii
+    add     r0, r0, #'0'    ; decimal to ascii
     bl      print_char
     sub     r7, r7, #1
     CMP     r7, #0
-   	moveq	r0, #(32)
+   	moveq	r0, #(32)       ; for seperate, add ' ' before numbers
     bleq	print_char
     beq     get_sorted_num
     bne     print_num
-
 print_char
-    stmfd   sp!, {r0, lr}   ; push the registers that
+    stmfd   sp!, {r0, lr}   
     adr     r1, char
     strb    r0, [r1]
     mov     r0, #3
     swi     0x123456
     ldmfd   sp!, {r0,pc}
+
 swap
     str     r7, [r1, r10]
     add 	r11, r10, #4
@@ -112,10 +124,10 @@ finish
     add     r1, r1, #0x26       
     SWI     0x123456           
 scan   
-    stmfd	sp!, {lr} ; Push onto a Full Descending Stack
-	mov		r0, #7 ; r0 = 7
+    stmfd	sp!, {lr}       ; Push onto a Full Descending Stack
+	mov		r0, #7          ; r0 = 7
 	swi		0x123456
-	ldmfd	sp!, {pc} ; Pop from a Full Descending Stack
+	ldmfd	sp!, {pc}       ; Pop from a Full Descending Stack
 
 char       
     DCB      0
