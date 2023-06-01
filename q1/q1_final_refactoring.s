@@ -10,7 +10,6 @@ main
     b       finish
 scan_nums
     stmfd   sp!, {r0-r3, r7, lr}
-   ; mov     r1, #0x80000000 ; address for 5 number inputs(=r0)
     mov     r2, #0          ; counter for 5 number inputs(=r2)
     mov     r3, #0          ; init for initial input(=r3)
     mov     r7, #0          ; flag for minus(=r7)
@@ -39,7 +38,6 @@ after_space
 
 bubble_sort
     stmfd   sp!,{r1,r2,r4-r8,r10, lr} ; Register preservation
-    ;mov     r1, #0x80000000 ; address for 5 number inputs(=r0)
     mov 	r2, #4          ; initial setting for(i=n-1;i>0;i--)
     MOV     r5, r2          ; i=n-1 for setting outer loop(=r5)
     mov     r10, #(0)       ; j=0 setting for inner loop
@@ -63,7 +61,6 @@ inner_loop
 
 print_sorted_nums
     stmfd   sp!, {r1,r2,r7-r11,lr}
-    ;mov     r1, #0x80000000 ; refresh r1 to original address point     
     mov     r2, #0          ; for quotient
     mov     r7, #0          ; record digit(for space & check printing number finish, =r7)
 	mov		r8, #0          ; counter for how many number printed(max 5, =r8)
