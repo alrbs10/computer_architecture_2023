@@ -26,9 +26,7 @@ concat_6_9
     ldrb    r2, [r1, #9]    ; load data from room 9
     ldrb    r3, [r1, #6]    ; load data from room 6
     add     r3, r3, r2      ; sum room from 6, 9
-    and     r4, r3, #1
-    cmp     r4, #0
-    blne    add_1_for_odd
+    add     r3, r3, #1
     mov     r3, r3, lsr #1  ; make half of room 6, 9
     strb    r3, [r1, #6]    ; after making half, store to memory
     b       count_max
@@ -36,7 +34,7 @@ count_max
     mov     r3, #0          ; initial set for max value, =r3
     mov     r2, #0          ; refresh r2 for counter, max=9 (since check room for only 0~8)
 find_max_each_room
-    cmp     r2, #8          ; if find for all room, finish
+    cmp     r2, #9          ; if find for all room, finish
     addeq   r0, r3, #0      ; send r0 = r3 to print function
     moveq   r2, #0          ; refresh quoisent for division
     beq     divide_for_decimal
@@ -46,10 +44,6 @@ find_max_each_room
     add     r2, r2, #1      ; r2++, check for next room
     b       find_max_each_room
 
-add_1_for_odd
-    stmfd   sp!, {lr}
-    add     r3, r3, #1
-    ldmfd   sp!, {pc}
 
 divide_for_decimal
  	cmp     r0, r12         ; if r0<10, r0 now be remainder
@@ -72,7 +66,6 @@ print_num
     bl      print_char      
     sub     r7, r7, #1
     CMP     r7, #0
-    bleq	print_char
     beq     finish
     bne     print_num
 print_char
