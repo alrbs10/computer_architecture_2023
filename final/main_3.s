@@ -7,11 +7,10 @@ main
     mov     r2, #0          ; register to compare with 0~9, 10 numbers
     mov     r7, #0          ; record digit(for space & check printing number finish, =r7)
     mov     r12, #10        ; print decimal
-    b      initial_room
 initial_room
     cmp     r2, #10 
     beq     scan_each
-    strb    r0, [r1, r2]        ; make 0 for 0~9 room
+    strb    r0, [r1, r2]    ; make 0 for 0~9 room
     add     r2, r2, #1
     b       initial_room
 scan_each    
@@ -31,7 +30,7 @@ concat_6_9
     cmp     r4, #0
     blne    add_1_for_odd
     mov     r3, r3, lsr #1  ; make half of room 6, 9
-    strb     r3, [r1, #6]    ; after making half, store to memory
+    strb    r3, [r1, #6]    ; after making half, store to memory
     b       count_max
 count_max
     mov     r3, #0          ; initial set for max value, =r3
@@ -70,7 +69,7 @@ end_divide
 print_num    
     ldmfd   sp!,{r0}
     add     r0, r0, #'0'    ; decimal to ascii
-    bl      print_char
+    bl      print_char      
     sub     r7, r7, #1
     CMP     r7, #0
     bleq	print_char

@@ -12,52 +12,43 @@ for_non_prime_break
     add     r3, r3, #1  ; i++
     cmp     r3, #5
     bleq    print_char
+    ble     finish
     bne		for_loop	
-    b       finish
-
 scan_num
-    stmfd   sp!, {r0,lr}
+    stmfd   sp!, {lr}
     mov     r2, #0      ; main check num at all trial, temp
 scan_loop
     bl      scan            ; get keyboard input
     sub     r0, r0, #'0'    ; ASCII -> decimal
     cmp     r0, #(-16)      ; if space is detected, go to next input
-    bne     continue
-    ldmfd   sp!, {r0,pc}
-continue   
+    beq     return_scan     
     mul     r2, r12, r2     ; multiply 10 for before num
     add     r2, r0, r2      ; add recently scanned number
     b       scan_loop       ; loop
-
+return_scan
+    ldmfd   sp!, {pc}
 check_prime
     stmfd   sp!, {lr}
     ; quick break for 0,1 -> not prime / 2->prime, r1++ / other even->not prime
     cmp     r2, #2          ; if r2<2 (r2=0,1), break
+    blt     return_check
     addeq   r1, r1, #1      ; if r=2, only even prime, r1++ and break
-    bgt     check_even
-    ldmfd   sp!, {pc}
-check_even
+    beq     return_check
+    
     and     r4, r2, #1      ; except 2, all even is not prime, break
     cmp     r4, #0
-    bne     continue_prime
-    ldmfd   sp!, {pc}
-continue_prime
+    beq     return_check
+
     bl      find_sqrt
     cmp     r10, #1
     moveq   r10, #0         ; refresh when flag is used
-    bne     continue_prime_2
-    ldmfd   sp!, {pc}
-    
-continue_prime_2
+    beq     return_check
+
     mov     r6, #3          ; divide with r6, starting from 3~r5
 from_3_sqrt
     cmp     r5, r6
     addlt   r1, r1, #1
-    bgt     continue_prime_3
-    beq     continue_prime_3
-    ldmfd   sp!, {pc}
-
-continue_prime_3
+    blt     return_check
     mov     r7, r2          ; copy original r2 to r7
     bl      divide
     add     r6, r6, #1
@@ -72,17 +63,24 @@ for_loop_sqrt
     addlt   r5, r5, #1      ; if i^2<temp, i++
     blt 	for_loop_sqrt
     moveq   r10, #1
+    beq     return_sqrt     ; if i^2=temp, temp is not prime, break
+    bgt     return_sqrt 
+return_sqrt
+    ldmfd   sp!, {pc}
+
+return_check
     ldmfd   sp!, {pc}
 
 divide
     stmfd   sp!, {lr}
 divide_loop
  	cmp     r7, r6         ; if r7(dividend)<r6(divider), r7 now be remainder
-    bgt     continue_loop
-    ldmfd   sp!, {pc}
-continue_loop
+    blt     return_from_divide ; go back to divide
+    beq     return_check
  	sub     r7, r7, r6     ; r7 = r7-10,
  	b       divide_loop    ; loop
+return_from_divide
+    ldmfd   sp!, {pc}
 
 scan   
     stmfd	sp!, {lr}    ; Push onto a Full Descending Stack
