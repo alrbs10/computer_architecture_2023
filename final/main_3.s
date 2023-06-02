@@ -43,8 +43,6 @@ find_max_each_room
     movgt   r3, r4          ; if current room is bigger than max, update max
     add     r2, r2, #1      ; r2++, check for next room
     b       find_max_each_room
-
-
 divide_for_decimal
  	cmp     r0, r12         ; if r0<10, r0 now be remainder
  	blt     end_divide      

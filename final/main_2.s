@@ -1,34 +1,32 @@
     AREA text, CODE
     ENTRY
 main
-    mov     r1, #0      ; final answer, number of primes
-    mov     r3, #0      ; counter for 5 inputs (for i=0;i<5;i++)
-    mov     r10, #0     ; flag for non prime(i*i=temp)
-    mov     r12, #10    ; for decimal
+    mov     r1, #0          ; final answer, number of primes
+    mov     r3, #0          ; counter for 5 inputs (for i=0;i<5;i++)
+    mov     r10, #0         ; flag for non prime(i*i=temp)
+    mov     r12, #10        ; for decimal
 for_loop
     bl      scan_num
     bl      check_prime
 for_non_prime_break
-    add     r3, r3, #1  ; i++
+    add     r3, r3, #1      ; i++
     cmp     r3, #5
     bleq    print_char
     bne		for_loop	
     b       finish
-
 scan_num
-    stmfd   sp!, {r0,lr}
-    mov     r2, #0      ; main check num at all trial, temp
+    stmfd   sp!, {lr}
+    mov     r2, #0          ; main check num at all trial, temp
 scan_loop
     bl      scan            ; get keyboard input
     sub     r0, r0, #'0'    ; ASCII -> decimal
     cmp     r0, #(-16)      ; if space is detected, go to next input
     bne     continue
-    ldmfd   sp!, {r0,pc}
+    ldmfd   sp!, {pc}
 continue   
     mul     r2, r12, r2     ; multiply 10 for before num
     add     r2, r0, r2      ; add recently scanned number
     b       scan_loop       ; loop
-
 check_prime
     stmfd   sp!, {lr}
     ; quick break for 0,1 -> not prime / 2->prime, r1++ / other even->not prime
@@ -81,14 +79,14 @@ divide_loop
     bgt     continue_loop
     ldmfd   sp!, {pc}
 continue_loop
- 	sub     r7, r7, r6     ; r7 = r7-10,
+ 	sub     r7, r7, r6     ; r7 = r7-r6,
  	b       divide_loop    ; loop
 
 scan   
-    stmfd	sp!, {lr}    ; Push onto a Full Descending Stack
+    stmfd	sp!, {lr}       ; Push onto a Full Descending Stack
 	mov		r0, #7          ; r0 = 7
 	swi		0x123456
-	ldmfd	sp!, {pc}    ; Pop from a Full Descending 
+	ldmfd	sp!, {pc}       ; Pop from a Full Descending 
     
 print_char
     stmfd   sp!, {r0, lr}   
